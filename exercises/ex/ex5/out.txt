@@ -1,0 +1,5 @@
+apple : 24
+long : 16
+crop : 24
+pop : 88
+red : 8
