@@ -1,5 +1,10 @@
-apple : 24
-long : 16
-crop : 24
-pop : 88
-red : 8
+dog : 1
+cat : 2
+ants : 1
+apple : 1
+long : 1
+can : 1
+toe : 1
+poet : 1
+crop : 1
+pop : 4
