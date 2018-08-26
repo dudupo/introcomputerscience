@@ -2,16 +2,33 @@
 # file_name : crossword.py
 
 
-'''
-    automat[(i , j)][X] -> True , directions, Y
-                        -> False, None, None
-                        -> True , None, $
-'''
 from copy import deepcopy , copy
 
-def crossword( matrix , wards , directionsstring , output_file):
 
-    print(matrix)
+def matrix2dgen(matrix):
+    for j , line in enumerate( matrix ):
+        for i , X in enumerate( line ) :
+            yield (i , j) , X
+
+def cube3dgenA(cube):
+    for k , matrix in enumerate( cube ) :
+        for (i , j) , X in matrix2dgen( matrix ) :
+            yield (i , j , k) , X
+
+def cube3dgenB(cube):
+    for j in range(len( cube[0] )) :
+        for k in range(len( cube )) :
+            for i in range(  len(cube[0][0]) ) :
+                yield (i , k , j) , cube[k][j][i]
+
+def cube3dgenC(cube):
+    for i in range(len( cube[0][0] )) :
+        for k in range(len( cube )) :
+            for j in range(  len(cube[0][0]) ) :
+                yield (j , k , i) , cube[k][j][i]
+
+def crossword( matrix , wards , directionsstring , output_file , matrixgen=matrix2dgen):
+
     thereisoppsite = False
     opposite =  {'r' : 'l' , 'u' : 'd' ,'x' : 'y' , 'z' : 'w' }
     rdirectionsstring = ""
@@ -35,15 +52,13 @@ def crossword( matrix , wards , directionsstring , output_file):
     wards  = [ list(_str) + ['$' ] +  [ward] for _str , ward in wards ]
     rwards = [ list(_str) + ['$']  +  [ward] for _str , ward in rwards]
 
-    print(len(wards))
-
     directions = {
         'd' : ( lambda i , j : (i , j + 1 )) ,
         'l' : ( lambda i , j : (i + 1 , j )) ,
         'w' : ( lambda i , j : (i - 1 , j + 1 )) ,
         'y' : ( lambda i , j : (i + 1 , j + 1 ))
     }
-    print(wards[1][1:])
+
     rdirections = { key : value for key , value in directions.items() \
      if key in rdirectionsstring }
 
@@ -58,35 +73,25 @@ def crossword( matrix , wards , directionsstring , output_file):
             for direction , f in _directions.items():
                 defaultstate[ward[0]].append (  (iter(ward[1:]) , direction))
 
-    '''
-    defaultstate =  { **{ ward[0] :[ (iter(ward[1:]) , direction) \
-     for direction , f in adirections.items()] for ward in wards } , \
-     ** { ward[0] :[ (iter(ward[1:]) , direction) \
-      for direction , f in rdirections.items()] for ward in rwards } }
-    '''
-    #print(defaultstate)
     automat =  { }
-    for j , line in enumerate( matrix ):
-        for i , X in enumerate( line ) :
-            automat[(i , j)] = deepcopy(defaultstate)
+    for (i , j) , X in matrixgen(matrix):
+        automat[(i , j)] = deepcopy(defaultstate)
 
-    for j , line in enumerate( matrix )  :
-        for i , X in enumerate( line ) :
-            state = automat[(i , j)]
-            if X in state :
-                for _nextgen , direction in state[X] :
-                    _nextgen = copy(_nextgen)
-                    _next = next( _nextgen )
-                    if _next == '$':
-                        out[next(_nextgen)] += 1
+    for position , X in matrixgen(matrix):
+        state = automat[position]
+        if X in state :
+            for _nextgen , direction in state[X] :
+                _nextgen = copy(_nextgen)
+                _next = next( _nextgen )
+                if _next == '$':
+                    out[next(_nextgen)] += 1
 
-                    else:
-                        _i , _j = directions[direction]( i , j )
-                        #print( "_i : {0} ~ _j : {1}".format(_i , _j))
-                        if (_i , _j) in automat :
-                            automat[ (_i , _j) ][ _next ] = [ ] \
-                             if _next not in automat[(_i , _j)] else automat[(_i , _j)][_next]
-                            automat[ (_i , _j)][ _next ].append( (copy( _nextgen ) , direction)  )
+                else:
+                    _nextposition = directions[direction]( *position )
+                    if _nextposition in automat :
+                        automat[ _nextposition ][ _next ] = [ ] \
+                         if _next not in automat[_nextposition] else automat[_nextposition][_next]
+                        automat[ _nextposition][ _next ].append( (copy( _nextgen ) , direction)  )
 
     with open(output_file, 'w') as _file :
         for ward , _count in out.items() :
@@ -100,7 +105,6 @@ if __name__ == '__main__':
     if len(args) > 4 :
         wards  = [ line.rstrip('\n') for line in open( args[1] ).readlines() ]
         matrix = [ [ X for X in line.rstrip('\n') if X != ',' ]  for line in open(args[2]).readlines() ]
-        print(matrix)
         crossword(matrix , wards , args[3] , args[4] )
     else :
         print ("ERROR: invalid number of parameters. Please enter word_file matrix_file output_file directions.")
