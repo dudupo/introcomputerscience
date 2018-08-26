@@ -8,26 +8,15 @@ from copy import deepcopy , copy
 def matrix2dgen(matrix):
     for j , line in enumerate( matrix ):
         for i , X in enumerate( line ) :
-            yield (i , j) , X
+            yield (i , j , 0) , X
 
-def cube3dgenA(cube):
+def cube3dgen(cube):
     for k , matrix in enumerate( cube ) :
-        for (i , j) , X in matrix2dgen( matrix ) :
-            yield (i , j , k) , X
+        for j , line in enumerate( matrix ):
+            for i , X in enumerate( line ) :
+                yield (i , j , k) , X
 
-def cube3dgenB(cube):
-    for j in range(len( cube[0] )) :
-        for k in range(len( cube )) :
-            for i in range(  len(cube[0][0]) ) :
-                yield (i , k , j) , cube[k][j][i]
-
-def cube3dgenC(cube):
-    for i in range(len( cube[0][0] )) :
-        for k in range(len( cube )) :
-            for j in range(  len(cube[0][0]) ) :
-                yield (j , k , i) , cube[k][j][i]
-
-def crossword( matrix , wards , directionsstring , output_file , matrixgen=matrix2dgen):
+def crossword( matrix , wards , directionsstring , output_file , matrixgen=matrix2dgen , directions3dstring='a'):
 
     thereisoppsite = False
     opposite =  {'r' : 'l' , 'u' : 'd' ,'x' : 'y' , 'z' : 'w' }
@@ -53,11 +42,24 @@ def crossword( matrix , wards , directionsstring , output_file , matrixgen=matri
     rwards = [ list(_str) + ['$']  +  [ward] for _str , ward in rwards]
 
     directions = {
-        'd' : ( lambda i , j : (i , j + 1 )) ,
-        'l' : ( lambda i , j : (i + 1 , j )) ,
-        'w' : ( lambda i , j : (i - 1 , j + 1 )) ,
-        'y' : ( lambda i , j : (i + 1 , j + 1 ))
+        'd' : ( lambda i , j , k : (i , j + 1     , k )) ,
+        'l' : ( lambda i , j , k : (i + 1 , j     , k )) ,
+        'w' : ( lambda i , j , k : (i - 1 , j + 1 , k )) ,
+        'y' : ( lambda i , j , k : (i + 1 , j + 1 , k))
     }
+
+
+    def permutation( arr , places ):
+        return arr[places[0]] , arr[places[1]] , arr[places[2]]
+
+    directions3d = {
+        'a' : (lambda i , j , k , f : permutation(f(i , j , k) , [0, 1, 2])),
+        'b' : (lambda i , j , k , f : permutation(f(i , k , j) , [0, 2, 1])),
+        'c' : (lambda i , j , k , f : permutation(f(j , k , i) , [2, 0, 1]))
+    }
+    
+    directions3d = { key : value for key , value in directions3d.items() \
+     if key in directions3dstring }
 
     rdirections = { key : value for key , value in directions.items() \
      if key in rdirectionsstring }
@@ -71,27 +73,27 @@ def crossword( matrix , wards , directionsstring , output_file , matrixgen=matri
             if ward[0] not in defaultstate:
                 defaultstate[ward[0]] = []
             for direction , f in _directions.items():
-                defaultstate[ward[0]].append (  (iter(ward[1:]) , direction))
+                for direction3d , g in directions3d.items():
+                    defaultstate[ward[0]].append (  (iter(ward[1:]) , direction3d , direction))
 
     automat =  { }
-    for (i , j) , X in matrixgen(matrix):
-        automat[(i , j)] = deepcopy(defaultstate)
+    for position , X in matrixgen(matrix):
+        automat[position] = deepcopy(defaultstate)
 
     for position , X in matrixgen(matrix):
         state = automat[position]
         if X in state :
-            for _nextgen , direction in state[X] :
+            for _nextgen , direction3d , direction in state[X] :
                 _nextgen = copy(_nextgen)
                 _next = next( _nextgen )
                 if _next == '$':
                     out[next(_nextgen)] += 1
-
                 else:
-                    _nextposition = directions[direction]( *position )
+                    _nextposition = directions3d[direction3d]( *position ,   directions[direction] )
                     if _nextposition in automat :
                         automat[ _nextposition ][ _next ] = [ ] \
                          if _next not in automat[_nextposition] else automat[_nextposition][_next]
-                        automat[ _nextposition][ _next ].append( (copy( _nextgen ) , direction)  )
+                        automat[ _nextposition][ _next ].append( (copy( _nextgen ) , direction3d ,  direction)  )
 
     with open(output_file, 'w') as _file :
         for ward , _count in out.items() :

@@ -1,2 +1,11 @@
-toe : 1
-poet : 1
+one : 1
+two : 1
+six : 1
+nine : 1
+ten : 1
+pole : 1
+red : 1
+blue : 1
+move : 1
+son : 1
+bye : 1
