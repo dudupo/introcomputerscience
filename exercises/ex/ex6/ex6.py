@@ -71,6 +71,7 @@ def downsample(image, max_diagonal_size):
     return  newimage
 
 from math import pi
+'''
 def get_angle(image):
     for angle in range( 0 , pi / 2 , 1 / (2*pi)  ) :
         for distance in range(0 , len(image) / (2 ** 0.5) , 0.1 ):
@@ -86,6 +87,7 @@ def get_angle(image):
             weight = 0
             for line in lines:
                 weight += len(line) ** 2
+'''
 
 import os
 if __name__ == "__main__" :
