@@ -107,7 +107,6 @@ class Ship(GameObj) :
             self.life -= 1
             return True
         else :
-            self._screen.show_message("~Sorry: " , "SpaceShip have been destroyed")
             self._screen.remove_life()
             self.life -= 1
             return False
