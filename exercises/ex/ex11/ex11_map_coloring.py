@@ -27,8 +27,8 @@ def run_map_coloring(adjacency_file, num_colors = 4, map_type = None):
     general_backtracking( [key for key in graph.keys()] , State  , 0 ,
                         COLORS[:num_colors] , check_map , graph)
 
-    from map_coloring_gui import color_map
-    color_map("USA" , State )
+    #from map_coloring_gui import color_map
+    #color_map("USA" , State )
 
 
 import os
