@@ -15,6 +15,14 @@ import heapq
 
 from copy import deepcopy , copy
 
+def initilaize(adj_dict, colors):
+    heap = [( 0 , key ) for key , value in adj_dict.items() ]
+    heapq.heapify(heap)
+    state = { key : None for key in adj_dict.keys() }
+    colors = { **{ 0  : deepcopy(colors)   } ,
+    **{key : deepcopy(colors) for key in adj_dict.keys() }}
+    return heap, state, colors
+
 def back_track(heap , state, adj_dict, colors, hooking=False):
     if len(heap) == 0 :
         return True
@@ -38,14 +46,7 @@ def back_track_degree_heuristic(adj_dict, colors):
     print (state)
 
 def back_track_MRV(adj_dict, colors):
-    heap = [( 0 , key ) for key , value in adj_dict.items() ]
-    heapq.heapify(heap)
-
-    state = { key : None for key in adj_dict.keys() }
-    colors = { **{ 0  : deepcopy(colors)   } ,
-    **{key : deepcopy(colors) for key in adj_dict.keys() }}
-
-
+    heap, state, colors = initilaize(adj_dict, colors)
     def back_track_mrv(heap , state, adj_dict, colors):
         def decrease_keys(country):
             ret =  True
@@ -91,12 +92,7 @@ def back_track_MRV(adj_dict, colors):
     print (state)
 
 def back_track_FC(adj_dict, colors):
-    heap = [( 0 , key ) for key , value in adj_dict.items() ]
-    heapq.heapify(heap)
-
-    state = { key : None for key in adj_dict.keys() }
-    colors = { **{ 0  : deepcopy(colors)   } ,
-    **{key : deepcopy(colors) for key in adj_dict.keys() }}
+    heap, state, colors = initilaize(adj_dict, colors)
 
     def back_track_fc(heap , state, adj_dict, colors):
         def decrease_keys(country):
@@ -132,12 +128,7 @@ def back_track_FC(adj_dict, colors):
     print (state)
 
 def back_track_LCV(adj_dict, colors):
-    heap = [( 0 , key ) for key , value in adj_dict.items() ]
-    heapq.heapify(heap)
-
-    state = { key : None for key in adj_dict.keys() }
-    colors = { **{ 0  : deepcopy(colors)   } ,
-    **{key : deepcopy(colors) for key in adj_dict.keys() }}
+    heap, state, colors = initilaize(adj_dict, colors)
 
     def back_track_lcv(heap , state, adj_dict, colors):
         def decrease_keys(country):
@@ -165,7 +156,6 @@ def back_track_LCV(adj_dict, colors):
             return True
         negdegree , country = heapq.heappop(heap)
         for color in sorted(colors[country], key = lambda color : - colorvalue(country , color)):
-            #if colorvalue(country , color)
             state[country] = color
             decrease_keys(country)
             if check_map(state, country, adj_dict) and \
@@ -183,9 +173,15 @@ def fast_back_track(adj_dict, colors):
 
 
 import os
+import threading
 if __name__ == '__main__' :
+    limit = 3000
+    os.sys.setrecursionlimit(limit)
     graph = read_adj_file( os.sys.argv[1] )
     back_track_degree_heuristic( graph , COLORS  )
     back_track_MRV( graph , COLORS )
     back_track_FC( graph , COLORS )
-    back_track_LCV( graph , COLORS)
+    def callable():
+        back_track_LCV( graph , COLORS)
+    thread = threading.Thread(target=callable)
+    thread.start()
