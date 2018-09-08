@@ -1,4 +1,6 @@
 import tkinter
+from threading import Timer
+
 
 class MatrixCanvas(  tkinter.Canvas  ):
     def __init__(self, masterroot, raws, columns, width, height ):
@@ -23,10 +25,11 @@ class MatrixCanvas(  tkinter.Canvas  ):
         return ret
     def create_line(self, *args ):
         return super().create_line(self.convertArray(*args))
-    def create_oval(self, color ='black', *args) :
-        x0 , y0 = args
+    def create_oval(self, *args) :
+        print(" ~ i was here ~ ")
+        x0 , y0 , color = args
         x1 , y1 = x0 + 1 , y0 + 1
-        return super().create_oval(self.convertArray(x0, y0, x1, y1), color=color)
+        return super().create_oval(self.convertArray(x0, y0, x1, y1), outline=color, fill='#ceceb1')
 
 class Screen:
 
@@ -44,10 +47,22 @@ class Screen:
         for j in range(self.__raws):
             self.__canvas.create_line( 0, j, self.__columns, j)
 
-        #C.create_oval( (width / cu) * 4 , (width / cu) * 4  , (width / cu) * 5 , (width / cu) * 5  )
         self.__canvas.pack()
 
     def getColor(self, player):
         return self.colors[player]
     def drawTool(self, x, y, player=0):
-        self.__canvas.create_oval(x, y, color = self.getColor(player))
+        color = self.getColor(player)
+        return self.__canvas.create_oval(x, y, color)
+
+    def animate(self, objId, x ,y):
+        def _animate(objId, x, y):
+            if (x , y) != self.__canvas.coords( objId ):
+                self.__canvas.move( objId , 10 , 10  )
+                Timer(0.005, call).start()
+        def call():
+            return _animate(objId, x, y)
+        _animate(objId, x, y)
+
+    def move(self, objId, x, y):
+        x , y = self.__canvas.coords(objId)

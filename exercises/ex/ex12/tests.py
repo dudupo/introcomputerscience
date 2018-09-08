@@ -8,13 +8,18 @@ def loadScreen(width = 600, cu=10 ):
     logging.info(' > function -> loadScreen ')
     __root = tkinter.Tk()
     __screen = screen.Screen(__root, height=width, width=width, columns=cu, raws=cu)
-    __screen.drawTool( 1 , 1 , 0)
-    __screen.drawTool(3 ,5 , 0)
+    _id = __screen.drawTool( 1 , 1 ,player=0)
+    print(_id)
+    __screen.drawTool(3 ,5 , player=0)
+    __screen.drawTool(3 ,6 , player=1)
+    __screen.drawTool(6 ,5 , player=1)
     logging.info( ' > exit function ( loadScreen )')
-    #__root.mainloop()
-    time.sleep(1)
-    __root.destroy()
+    __screen.animate(_id , 5 , 5 )
+    def loop():
+        threading.Timer(loop, 5).start()
 
+    loop()
+    threading.Timer(__root.mainloop(), 5).start()
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)

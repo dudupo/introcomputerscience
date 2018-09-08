@@ -22,3 +22,6 @@ class Controller:
         # C.pack()
     def start(self):
         self.__root.mainloop()
+
+    def mainloop(self):
+        self.__root.ontimer(self.mainloop, 5)
