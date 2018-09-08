@@ -11,9 +11,13 @@ class MatrixCanvas(  tkinter.Canvas  ):
         self.__MatrixCanvasColumns  = columns
 
     def convertX(self, x):
-        return x * ( self.__MatrixCanvasWidth / self.__MatrixCanvasRaws  )
+        return x * ( self.__MatrixCanvasWidth / self.__MatrixCanvasColumns  )
     def convertY(self, y):
-        return y * (self.__MatrixCanvasHeight / self.__MatrixCanvasColumns )
+        return y * (self.__MatrixCanvasHeight / self.__MatrixCanvasRaws )
+    def Xconvert(self , x):
+        return int( x * float(  self.__MatrixCanvasColumns  / self.__MatrixCanvasWidth))
+    def Yconvert(self, y):
+        return int( y * float( self.__MatrixCanvasRaws / self.__MatrixCanvasHeight ))
     def convertPoint(self, x, y):
         return self.convertX(x) , self.convertY(y)
     def convertArray(self, *args):
@@ -26,7 +30,6 @@ class MatrixCanvas(  tkinter.Canvas  ):
     def create_line(self, *args ):
         return super().create_line(self.convertArray(*args))
     def create_oval(self, *args) :
-        print(" ~ i was here ~ ")
         x0 , y0 , color = args
         x1 , y1 = x0 + 1 , y0 + 1
         return super().create_oval(self.convertArray(x0, y0, x1, y1), outline=color, fill='#ceceb1')
@@ -40,6 +43,8 @@ class Screen:
         self.__raws     = raws
         self.colors = { 0 : 'black' , 1 : 'red' }
         self.drawMatrix()
+        self.__vx = 0
+        self.__vy = (height / columns) / 5
 
     def drawMatrix(self):
         for i in range(self.__columns):
@@ -54,8 +59,9 @@ class Screen:
     def drawTool(self, x, y, player=0):
         color = self.getColor(player)
         return self.__canvas.create_oval(x, y, color)
-
-    def animate(self, objId, x, y, vx=10, vy=10):
+    def getCanvas(self):
+        return self.__canvas
+    def animate(self, objId, x, y):
         x , y = self.__canvas.convertPoint(x , y)
         def dis(x0, y0, x1, y1):
             return ( (x1 - x0) ** 2 + (y1 - y0)**2 ) ** 0.5
@@ -64,10 +70,10 @@ class Screen:
             x0 , y0 , _ , __ = self.__canvas.coords( objId )
             if (x, y) != (x0, y0):
                 self.__canvas.move( objId , vx , vy  )
-                Timer(0.005, call).start()
-        def call():
-            return _animate(objId, x, y, vx, vy)
-        _animate(objId, x, y, vx, vy)
+                Timer(0.005, _animate, [objId, x, y, vx, vy]).start()
 
-    def move(self, objId, x, y):
-        x , y = self.__canvas.coords(objId)
+        _animate(objId, x, y, self.__vx, self.__vy)
+    def Xconvert(self , x):
+        return self.__canvas.Xconvert(x)
+    def Yconvert(self, y):
+        return self.__canvas.Yconvert(y)
