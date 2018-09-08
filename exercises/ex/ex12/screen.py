@@ -55,14 +55,19 @@ class Screen:
         color = self.getColor(player)
         return self.__canvas.create_oval(x, y, color)
 
-    def animate(self, objId, x ,y):
-        def _animate(objId, x, y):
-            if (x , y) != self.__canvas.coords( objId ):
-                self.__canvas.move( objId , 10 , 10  )
+    def animate(self, objId, x, y, vx=10, vy=10):
+        x , y = self.__canvas.convertPoint(x , y)
+        def dis(x0, y0, x1, y1):
+            return ( (x1 - x0) ** 2 + (y1 - y0)**2 ) ** 0.5
+
+        def _animate(objId, x, y, vx, vy):
+            x0 , y0 , _ , __ = self.__canvas.coords( objId )
+            if (x, y) != (x0, y0):
+                self.__canvas.move( objId , vx , vy  )
                 Timer(0.005, call).start()
         def call():
-            return _animate(objId, x, y)
-        _animate(objId, x, y)
+            return _animate(objId, x, y, vx, vy)
+        _animate(objId, x, y, vx, vy)
 
     def move(self, objId, x, y):
         x , y = self.__canvas.coords(objId)
