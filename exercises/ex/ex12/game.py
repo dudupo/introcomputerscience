@@ -1,3 +1,5 @@
+import state
+
 class Game:
 
     @staticmethod
@@ -17,10 +19,12 @@ class Game:
         self.__playersGen = Game.playersGenerator(playerscount)
         self.__player = next( self.__playersGen )
         self.rawof = [ raws - 1 for column in range(columns) ]
+        self.__state = state.State(columns, raws, playerscount)
 
     def make_move(self, column):
         if self.rawof[column] >= 0 :
             self.__stack.append( ( column, self.rawof[column], self.genid(), self.__player ) )
+            self.__state = self.__state.updateState(column, self.rawof[column], self.__player )
             self.__i += 1
             self.__player = next(self.__playersGen)
             self.rawof[column] -= 1
@@ -28,10 +32,10 @@ class Game:
         return False
 
     def get_winner(self):
-        pass
+        return self.__state.get_winner()
 
     def get_player_at(self, row, col):
-        pass
+        return self.__state.get_player_at(raw, col)
 
     def get_current_player(self):
         return self.__player
