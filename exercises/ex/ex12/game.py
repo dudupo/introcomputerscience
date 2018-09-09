@@ -16,8 +16,9 @@ class Game:
         self.__raws , self.__columns = raws , columns
         self.__stack = []
         self.__i = 0
-        self.__playersGen = Game.playersGenerator(playerscount)
-        self.__player = next( self.__playersGen )
+        self.__nextplayer = { i : i + 1 for i in range(playerscount-1)}
+        self.__nextplayer[playerscount - 1] = 0
+        self.__player = 0
         self.rawof = [ raws - 1 for column in range(columns) ]
         self.__state = state.State(columns, raws, playerscount)
 
@@ -26,7 +27,7 @@ class Game:
             self.__stack.append( ( column, self.rawof[column], self.genid(), self.__player ) )
             self.__state = self.__state.updateState(column, self.rawof[column], self.__player )
             self.__i += 1
-            self.__player = next(self.__playersGen)
+            self.__player = self.__nextplayer[self.__player]
             self.rawof[column] -= 1
             return True
         return False

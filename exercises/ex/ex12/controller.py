@@ -6,7 +6,7 @@ from time import sleep
 class Controller:
 
     def __init__(self):
-        cu = 10
+        cu = 5
         width = 600
         self.__root = tkinter.Tk()
         self.__screen = screen.Screen(self.__root, height=width, width=width, columns=cu, raws=cu)
@@ -14,10 +14,9 @@ class Controller:
         self.__game   = game.Game(columns=cu, raws=cu)
         self.__play   = True
         self.__interval = 0.5
-        self.__input_pipe = { 0 : RandomInputPipe(0) , 1 : ClickerInputPipe(1, self.__screen.getCanvas(), self )}
+        self.__input_pipe = { 0 : AIInputPipe(self.__game, 0 , 1,) , 1 : ClickerInputPipe(1, self.__screen.getCanvas(), self )}
         self.__id_hash = {}
         self.__running = True
-        cu = 10
         self.__root.update_idletasks()
         self.__root.update()
 
@@ -99,3 +98,18 @@ class RandomInputPipe(InputPipe):
     def __call__(self):
         self.i += 1
         return randint(0 , 9)
+
+import ai
+
+class AIInputPipe(InputPipe):
+    def __init__(self, game, player, enemy):
+        super().__init__(player)
+        self.__game = game
+        self.__enemy = enemy
+    def __call__(self):
+        winer , op = ai.GameBackTrack(self.__game, self.player, self.__enemy).back_track()
+        if winer == self.__enemy :
+            return randint(0 , 9)
+        else :
+            return op
+        self.i += 1
